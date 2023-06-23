@@ -1,62 +1,82 @@
-.logo {
-    display: grid;
-    gap: 4px;
-    justify-content: center;
-    justify-items: center;
-    text-align: center;
-}
-.logo img {
-    height: 50px;
-}
-
 header {
-    background-color: #3b85d9;
-    color: #000;
+    background: #d76f1a;
+    padding: 12px 20px;
     display: flex;
+    gap: 12px;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 50px;
+    flex-wrap: wrap;
 }
-.header__menu {
+header .search-block {
+    order: 1;
+    width: 100%;
     display: flex;
-    gap: 20px;
+    justify-content: center;
 }
-
-footer {
+footer{
+    padding: 6px 10px;
     display: flex;
-    padding: 20px;
-    background-color:  #3b85d9;
-    color: #000;
+    justify-content: space-between;
+    background-color: #d76f1a;
+    color: #1F1F1B;
 }
-
-.footer__cell {
+.logo{
     display: flex;
-    flex-direction: column;
-    width: 50%;
-}
-
-.footer__menu {
-    width: 50%;
-    display: flex;
-    justify-content: space-around;
     align-items: center;
-    gap: 30px;
+    gap: 10px;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+.logo img {
+    height: 30px;
+}
+.footer-nav{
+    display: grid;
+    gap: 10px;
+    padding-left: 0;
 }
 
-@media (min-width: 320px) and (max-width: 720px) {
-    footer {
-        flex-direction: column-reverse;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .footer__cell {
-        justify-content: center;
-        align-items: center;
-        margin-top: 10px;
-    }
+.footer-nav a:hover{
+    color: orange;
+}
+.header-menu,
+.header-menu>span{
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.header-menu>span>*{
+    cursor: pointer;
+}
+.header-menu svg:hover {
+    fill: orange;
+}
+.logo:hover {
+    color: orange;
+}
+.header-badge{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    bottom: 35%;
+    left: 65%;
+    width: 15px;
+    height: 15px;
+    font-size: 10px;
+    border-radius: 50%;
+    font-weight: bold;
+    color: white;
+    background-color: red;
 }
 
-@media (min-width: 720px) and (max-width: 1300px) {
-
+@media (min-width: 576px){
+    header{
+        flex-wrap: nowrap;
+    }
+    header .search-block {
+        order: 0;
+        width: auto;
+    }
 }

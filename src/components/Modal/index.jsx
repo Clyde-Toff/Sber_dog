@@ -1,128 +1,142 @@
-import { useState } from 'react';
-import './style.css';
+import{useState, useContext, useEffect} from "react"
+import { X } from "react-bootstrap-icons"
+import {Button} from "react-bootstrap"
+import Ctx from "../../ctx"
+import "./style.css"
 
-const Modal = ({active, setActive}) => {
-    const [auth, setAuth] = useState(true);
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [pwd, setPwd] = useState('');
-    const [testPwd, setTestPwd] = useState('');
+const Modal = ({
+    isActive,
+    setIsActive,
+    setUser
+}) => {
+    const {api, userNameLS, userIdLS, userTokenLS} = useContext(Ctx)
+    const [isReg, setIsReg] = useState(false)
+    const [name, setName] = useState("")
+    const [email, setEmail] = useState("")
+    const [pwd, setPwd] = useState("")
+    const [pwd2, setPwd2] = useState("")
+    const [happenedUse, setHappenedUse] = useState(true)
 
-    const testAcces = {
-        color: pwd === testPwd ? 'forestgreen' : 'crimson'
-    }
-
-    const switchAuth = (e) => {
+    const changeForm = (e) => {
         e.preventDefault()
-        setAuth(!auth)
+        setIsReg(!isReg)
         clearForm()
     }
-
     const clearForm = () => {
-        setName('');
-        setEmail('');
-        setPwd('');
-        setTestPwd('');
+        setName("")
+        setEmail("")
+        setPwd("")
+        setPwd2("")
     }
-
-    const sendForm = async (e) => {
-        e.preventDefault();
-        let body = {
+    const handleForm = async (e) => {
+        e.preventDefault()
+        const body = {
             email: email,
             password: pwd
         }
-        if (!auth) {
-            body.name = name;
-            body.group = 'group-12'
+        if(isReg) {
+            body.name = name
+            body.group = "group-12"
         }
-        let log = 'https://api.react-learning.ru/signin'
-        let reg = 'https://api.react-learning.ru/signup'
 
-        let res = await fetch(auth ? log : reg, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(body)
-        })
-        let data = await res.json() 
-        if (!data.err) {
-            if (!auth) {
-                delete body.name;
-                delete body.group;
-                let resLog = await fetch(log, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(body)
-                })
-                let dataLog = await resLog.json() 
-                if(!data.err) {
-                    localStorage.setItem('rockUser', dataLog.data.name);
-                    clearForm();
-                    setActive(false)
-                } 
-            } else { 
-                if(!data.err) {
-                localStorage.setItem('rockUser', data.data.name);
-                clearForm();
-                setActive(false);
-            }
+        const data = await (isReg
+            ? api.register(body)
+            : api.auth(body)
+        )
+
+        if (data?.error === "Bad Request" || data.err?.statusCode === (401 || 400)) {
+            setHappenedUse(false)
+            setTimeout(() => {
+                setHappenedUse(true)
+            }, 1000)
         }
+        
+        if(isReg){
+            if(data?._id){
+                setIsReg(false)
+            }
+        }else{
+            if(data && data.token){
+                localStorage.setItem(userTokenLS, data.token)
+            }
+            if (data && data.data){
+                localStorage.setItem(userNameLS, data.data.name)
+                setUser(data.data.name)
+                localStorage.setItem(userIdLS, data.data._id)
+                clearForm()
+                setIsActive(false)
+            }
         }
     }
 
-    return <div className="modal-wrapper" style={{display: active ? 'flex' : 'none'}}>
-        <div className="modal">
-            <div className="btn">
-            <button onClick={() => setActive(false)}>Закрыть окно</button>
-            </div>
-            <h3>Авторизация</h3>
-            <form onSubmit={sendForm}>
-                {!auth && <label>
-                    Имя пользователя
-                    <input
+    const st = {
+        display: isActive ? "flex" : "none"
+    }
+
+    useEffect(() => {
+        const handleBodyScroll = (e) => {
+            if (isActive) {
+                document.body.classList.add("modal-open")
+            } else {
+                document.body.classList.remove("modal-open")
+            }
+        }
+        handleBodyScroll()
+    
+        return () => {
+            document.body.classList.remove("modal-open")
+        }
+    }, [isActive])
+
+    return <div className="modal-wrapper" style={st}>
+        <div className="modal-custom">
+                <X
+                    className="modal-close"
+                    onClick={(e) => setIsActive(false)}
+                />
+            <h3>{isReg ? "Регистрация" : "Вход"}</h3>
+            <form onSubmit={handleForm}>
+                {isReg && <input
+                    className="input-sign"
                     type="text"
+                    placeholder="Ваше имя"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}/>
-                </label>}
-                <label>
-                    Электронный адрес
-                    <input
+                    onChange={(e) => setName(e.target.value)}
+                />}
+                <input
+                    className={`${happenedUse ? "" : "text-danger"} input-sign`}
                     type="email"
+                    placeholder="Ваш электронный адрес"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}/>
-                </label>
-                <label>
-                    Пароль
-                    <input
+                    onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="username"
+                />
+                <input
+                    className={`${happenedUse ? "" : "text-danger"} input-sign`}
                     type="password"
+                    placeholder="Ваш пароль"
                     value={pwd}
-                    onChange={(e) => setPwd(e.target.value)}/>
-                </label>
-                {!auth && <label>
-                    Повторить пароль
-                    <input
+                    onChange={(e) => setPwd(e.target.value)}
+                    autoComplete="current-password"
+                />
+                {isReg && <input
+                    className="input-sign"
                     type="password"
-                    value={testPwd}
-                    onChange={(e) => setTestPwd(e.target.value)}
-                    style={testAcces}
-                    />
-                </label>}
-                <div className="modal-ctrl">
-                    <button className='modal-btn'
-                    disabled={!auth && (!pwd || pwd !== testPwd)}
-                    >
-                        {auth ? 'Войти' : 'Зарегистрироваться'}
-                        </button>
-                    <a href='' className='modal-link' onClick={switchAuth}>
-                        {auth ? 'Регистрация' : 'Войти'}
-                        </a>
+                    placeholder="Повторите пароль"
+                    value={pwd2}
+                    onChange={(e) => setPwd2(e.target.value)}
+                />}
+                <div className="modal-btns">
+                    <Button type="submit" className="me-3 rounded-pill" disabled={isReg && (pwd.length < 5 || pwd !== pwd2)}>
+                        {isReg ? "Зарегистрироваться" : "Войти"}
+                    </Button>
+                    <Button className="text-white rounded-pill btn-warning " onClick={changeForm}>
+                        {isReg ? "Войти" : "Зарегистрироваться"}
+                    </Button>
                 </div>
             </form>
         </div>
     </div>
 }
 
-export default Modal;
+export default Modal

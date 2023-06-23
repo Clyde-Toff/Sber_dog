@@ -1,35 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect, useContext} from "react"
+import {useNavigate} from "react-router-dom"
+import Ctx from "../../ctx"
+import "./style.css"
 
-import './style.css'
-
-const Search = ({arr, upd}) => {
-    const [text, setText] = useState('');
-    const [qauntity, setQuantity] = useState(arr.length);
-
-    const [count, updateCount] = useState(0);
-
-    let n = 1;
-    const click = () => {
-        console.log(n++);
-        updateCount(count + 1);
+const Search = (user) => {
+    const {setSearchResult, baseData, setGoods} = useContext(Ctx)
+    
+    const navigate = useNavigate()
+    const [text, setText] = useState("")
+    const [num, setNum] = useState(0)
+    
+    const changeValue = (e) => {
+        navigate("/catalog")
+        setText(e.target.value)
     }
+    
+    useEffect(() => {
+        let str = ''
+        if(num && text){
+            str = `По запросу ${text} найдено ${num} товаров`
+        }
+        else if (text){
+            str = `По запросу ${text} не найдено товаров`
+        }
+        else{
+            str = ''
+        }
+        setSearchResult(str)
+    }, [num, text, setSearchResult])
 
-    const searchByText = (e) => {
-        let val = e.target.value;
-        setText(val);
-        let res = arr.filter(el => el.name.toLowerCase().includes(val.toLowerCase()));
-        upd(res);
-        setQuantity(res.length);
-        console.log(res);
-    }
+    useEffect(()=>{
+        let result = baseData.filter(el => el.name.includes(text.toLowerCase()))
+        setGoods(result)
+        setNum(result.length)
+    }, [text, baseData, setGoods])
 
-    return <div className="search-block">
-        <input type="search" className='search' placeholder='введите слово' value={text} onChange={searchByText}/>
-        <button onClick={click}>поиск</button>
-        <hr />
-        {/* <div>{text}, {n}, {count}</div> */}
-        <div>По вашему запросу {text} найжено {qauntity} подходящих товаров</div>
-    </div>
+    return <>
+        <input className="search" type="search" value={text} onChange={changeValue} disabled={!user.user}/>
+    </>
 }
 
-export default Search;
+export default Search

@@ -1,7 +1,7 @@
-import Logo from './Logo';
-import Header from './Header';
-import Footer from './Footer';
+import Header from "./Header"
+import Footer from "./Footer"
+import Logo from "./Logo"
 
-import './style.css';
+import "./style.css"
 
-export {Logo, Header, Footer};
+export {Header, Footer, Logo}

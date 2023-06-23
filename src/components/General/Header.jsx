@@ -1,30 +1,82 @@
-import Logo from './Logo'
+import {Link} from "react-router-dom"
+import { useContext } from "react"
+import Logo from "./Logo"
+import Ctx from "../../ctx"
+import {
+    Cart4,
+    PersonCircle,
+    BuildingUp,
+    Heart,
+    HeartFill
 
-const Header = ({user, setUser, setModalActive}) => {
-    const logOut = (e) => {
-        e.preventDefault();
-        setUser('')
-        localStorage.removeItem("rockUser");
+} from "react-bootstrap-icons"
+
+import Search from "../Search"
+
+const Header = ({
+        user,
+        searchArr,
+        setGoods,
+        setModalOpen
+}) => {
+
+    const {basket, userId, baseData} = useContext(Ctx)
+
+    const login = () => {
+        setModalOpen(true)
     }
-    const logIn = (e) => {
-        e.preventDefault();
-        // setUser('lk-band');
-        // localStorage.setItem("rockUser", "lk-band");
-        setModalActive(true);
+
+    const countLike = baseData.reduce((acc, obj) => {
+        if (obj.likes.includes(userId)) {
+            return acc + 1
     }
+        return acc
+    }, 0)
+
     return <header>
         <Logo/>
-        <div className="search"></div>
-        <nav className="header__menu">
+        <div className="search-block">
+            <Search
+                data={searchArr}
+                setGoods={setGoods}
+                user={user}
+            />
+        </div>
+        <nav className="header-menu">
             {user && <>
-                <a href="">Избранное</a>
-                <a href="">Корзина</a>
-                <a href="">Профиль</a>
-                <a href="" onClick={logOut}>Выйти</a>
-            </>}
-            {!user && <a href="" onClick={logIn}>Войти</a>}
+                <Link to="/favorites" >
+                <div className="position-relative">
+                    {countLike > 0
+                        ? <>
+                            <HeartFill title="Избранное"/>
+                            <span className="header-badge ">
+                                {countLike}
+                            </span>
+                        </>
+                        : <Heart title="Избранное"/>
+                    }
+                    </div>
+                </Link>
+                <Link to="/basket" className="header__link">
+                    <div className="position-relative">
+                    <Cart4 title="Корзина"/>
+                        {basket.length > 0 && <>
+                            <span className="header-badge">
+                                {basket.reduce((acc, el) => acc + el.cnt, 0) }
+                            </span>
+                        </>}
+                    </div>
+                </Link>
+                <Link to="/profile">
+                    <PersonCircle title="Личный кабинет"/>
+                </Link>
+            </>
+            }
+            <span>
+                {!user && <BuildingUp title="Войти" onClick={login}/>}
+            </span>
         </nav>
     </header>
 }
 
-export default Header;
+export default Header
